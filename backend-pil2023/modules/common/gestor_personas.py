@@ -2,7 +2,7 @@ from modules.common.gestor_comun import ResponseMessage, validaciones
 from modules.models.entities import Persona, Genero, Pais, Provincia, Ciudad, Barrio, Lugar
 from config import registros_por_pagina
 from datetime import datetime
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 
 class gestor_personas(ResponseMessage):
@@ -154,7 +154,7 @@ class gestor_personas(ResponseMessage):
             self.Exito = False
             self.MensajePorFallo = "La persona no existe"
             return self.obtenerResultado()
-        resultado_borrar = persona.borrar()
+        resultado_borrar = persona.activar(False)
         self.Exito = resultado_borrar["Exito"]
         self.MensajePorFallo = resultado_borrar["MensajePorFallo"]
         return self.obtenerResultado()
@@ -196,4 +196,27 @@ class gestor_personas(ResponseMessage):
         return self.obtenerResultado()
 
     def obtener_todo(self):
-        return Persona.obtener_todo()
+        return Persona.query.all()
+
+    def obtener_con_filtro(self, **kwargs):
+        query = Persona.query.filter(Persona.activo == True)
+        if 'nombre' in kwargs:
+            query = query.filter(Persona.nombre.ilike(f"%{kwargs['nombre']}%"))
+        if 'apellido' in kwargs:
+            query = query.filter(Persona.apellido.ilike(f"%{kwargs['apellido']}%"))
+        if 'personal_id' in kwargs:
+            query = query.filter(func.replace(Persona.personal_id, '.', '').ilike(f"%{kwargs['personal_id']}%"))
+        if 'email' in kwargs:
+            query = query.filter(Persona.email.ilike(f"%{kwargs['email']}%"))
+        if 'genero' in kwargs:
+            query = query.join(Genero).filter(Genero.nombre == kwargs['genero'])
+        if 'pais' in kwargs:
+            query = query.join(Lugar).join(Pais).filter(Pais.nombre.ilike(f"%{kwargs['pais']}%"))
+        if 'provincia' in kwargs:
+            query = query.join(Lugar).join(Provincia).filter(Provincia.nombre.ilike(f"%{kwargs['provincia']}%"))
+        if 'ciudad' in kwargs:
+            query = query.join(Lugar).join(Ciudad).filter(Ciudad.nombre.ilike(f"%{kwargs['ciudad']}%"))
+        if 'barrio' in kwargs:
+            query = query.join(Lugar).join(Barrio).filter(Barrio.nombre.ilike(f"%{kwargs['barrio']}%"))
+
+        return query.all() if any(kwargs.values()) else []

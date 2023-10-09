@@ -16,42 +16,24 @@ login_manager = LoginManager()
 csrf = CSRFProtect()
 
 
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
-@login_manager.unauthorized_handler
-def unauthorized():
-    if "/api/" in request.path:
-        return abort(401)
-    return redirect(url_for('auth.login'))
-
-
-@auth_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('routes.index'))
-
-    form = LoginForm()
-
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for('routes.index'))
-        else:
-            flash("Credenciales no válidas. Intente nuevamente.", 'danger')
-    return render_template('login.html', form=form)
-
+@auth_bp.route('/sing-up', methods=['POST'])
+@csrf.exempt
+def sign_up():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    activo = 1
+    try:
+        user = User(username=username, password=password, activo=activo)
+        user.guardar()
+        print('Usuario creado correctamente')
+        return {"msg": "Usuario creado correctamente"}, 200
+    except Exception as e:
+        print(f'Hubo un error al crear un usuario: {e}')
+        return {"msg": "Error al crear un usuario"}, 400
 
 @auth_bp.route('/login-jwt', methods=['POST'])
 @csrf.exempt
@@ -72,13 +54,6 @@ def login_jwt():
         return {"user": user_send, "access_token": access_token}, 200
     else:
         return {"user": None, "access_token": None, "msg": "Credenciales invalidas"}, 401
-
-
-@auth_bp.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('auth.login'))
 
 
 def jwt_or_login_required():

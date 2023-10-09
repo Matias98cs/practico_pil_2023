@@ -10,19 +10,120 @@ class gestor_carreras_personas(ResponseMessage):
     def __init__(self):
         super().__init__()
 
+    campos_obligatorios = {
+        'universidad': 'La universidad es obligatoria',
+        'campus': 'El campus es obligatorio',
+        'programa': 'El programa es obligatorio',
+        'facultad': 'La facultad es obligatoria',
+        'tipo': 'El tipo de persona es obligatorio'
+    }
+
+    def validar_campos_obligatorios(self, kwargs):
+        for campo, mensaje in self.campos_obligatorios.items():
+            if campo not in kwargs or kwargs(campo):
+                self.Exito = False
+                self.MensajePorFallo = mensaje
+                return False
+        return True
+    
+    def crear(self, **kwargs):
+        if not self.validar_campos_obligatorios(kwargs):
+            return self.obtenerResultado()
+
+        tipopersona=TipoPersona.crear_y_obtener(nombre=kwargs['tipo'])
+        universidad=Universidad.crear_y_obtener(nombre=kwargs['universidad'])
+        facultad=Facultad.crear_y_obtener(nombre=kwargs['facultad'])
+        campus=Campus.crear_y_obtener(nombre=kwargs['campus'])
+        programa=Programa.crear_y_obtener(nombre=kwargs['programa'])
+        carrera = Carrera.crear_y_obtener(universidad=universidad, facultad=facultad, campus=campus, programa=programa)
+        persona=Persona.crear_y_obtener(id=kwargs['persona_id'])
+
+        nueva_carrera_persona = personasCarreras( persona=persona, carrera=carrera, tipopersona=tipopersona )
+
+        resultado_crear=nueva_carrera_persona.guardar()
+        self.Resultado=resultado_crear['Resultado']
+        self.Exito=resultado_crear['Exito']
+        self.MensajePorFallo=resultado_crear['MensajePorFallo']
+        
+        return self.obtenerResultado()
+
+    def editar(self, id, **kwargs):
+        if not self.validar_campos_obligatorios(kwargs):
+            return self.obtenerResultado()
+        
+        personacarrera = personasCarreras.query.get(id)
+        print('id de la carrera-persona')
+        print(id)
+
+        if personacarrera==None:
+            self.Exito=False
+            self.MensajePorFallo = "La persona carrera no existe"
+            return self.obtenerResultado()
+        
+        persona=personacarrera.persona
+        print('Modificar Persona')
+        print(persona)
+
+        universidad=personacarrera.carrera.universidad
+        facultad=personacarrera.carrera.facultad
+        campus=personacarrera.carrera.campus
+        programa=personacarrera.carrera.programa
+
+        if 'universidad' in kwargs:
+            universidad = Universidad.crear_y_obtener(nombre=kwargs['universidad'])
+        if 'facultad' in kwargs:
+            facultad = Facultad.crear_y_obtener(nombre=kwargs['facultad'])
+        if 'campus' in kwargs:
+            campus = Campus.crear_y_obtener(nombre=kwargs['campus'])
+        if 'programa' in kwargs:
+            programa = Programa.crear_y_obtener(nombre=kwargs['programa'])
+
+        carrera=Carrera.crear_y_obtener(universidad=universidad, facultad=facultad, campus=campus, programa=programa)
+
+        tipo=personacarrera.tipopersona
+
+        if 'tipo' in kwargs:
+            tipo=TipoPersona.crear_y_obtener(nombre=kwargs['tipo'])
+
+        personacarrera.tipopersona=tipo
+        personacarrera.carrera=carrera
+
+        resultado_guardar = personacarrera.guardar()
+        self.Exito = resultado_guardar["Exito"]
+        self.MensajePorFallo = resultado_guardar["MensajePorFallo"]
+        return self.obtenerResultado()  
+
     def obtener_carreras_por_persona(self, persona):
         carreras = (
             db.session.query(personasCarreras)
             .filter(personasCarreras.persona == persona)
             .filter(personasCarreras.activo == True)
-            .all()
+            .join(Carrera)
+            .join(Carrera.activo==True)
+            .join(Universidad)
+            .join(Universidad.activo==True)
+            .join(Facultad)
+            .join(Facultad.activo==True)
+            .join(Campus)
+            .join(Campus.activo==True)
+            .join(Programa)
+            .join(Programa.activo==True)
+            .order_by(Universidad.nombre, Facultad.nombre, Campus.nombre, Programa.nombre).all()
+
         )
         return carreras
 
     def obtener_pagina(self, pagina, **kwargs):
-        query = personasCarreras.query
-        if 'persona' in kwargs:
-            query = query.filter(personasCarreras.persona == kwargs['persona'])
+        query = personasCarreras.query.filter_by(persona_id=kwargs['persona_id']).filter(personasCarreras.activo==True)
+        if 'programa' in kwargs:
+            query = query.join(Carrera).filter(Carrera.activo==True).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
+        if 'facultad' in kwargs:
+            query = query.join(Facultad).filter(Facultad.activo==True).join(Facultad).filter(Facultad.nombre.ilike(f"%{kwargs['facultad']}%"))
+        if 'campus' in kwargs:
+            query = query.join(Campus).filter(Campus.activo==True).join(Campus).filter(Campus.nombre.ilike(f"%{kwargs['campus']}%"))
+        if 'universidad' in kwargs:
+            query = query.join(Universidad).filter(Universidad.activo==True).join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
+
         carreras, total_paginas = personasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
         return carreras, total_paginas
 
@@ -35,26 +136,4 @@ class gestor_carreras_personas(ResponseMessage):
         resultado_borrar = carrera.activar(False)
         self.Exito = resultado_borrar["Exito"]
         self.MensajePorFallo = resultado_borrar["MensajePorFallo"]
-        return self.obtenerResultado()
-
-    def asignar_carrera(self, **kwargs):
-        if 'universidad' in kwargs:
-            universidad = Universidad.crear_y_obtener(nombre=kwargs['universidad'])
-        if 'facultad' in kwargs:
-            facultad = Facultad.crear_y_obtener(nombre=kwargs['facultad'])
-        if 'campus' in kwargs:
-            campus = Campus.crear_y_obtener(nombre=kwargs['campus'])
-        if 'programa' in kwargs:
-            programa = Programa.crear_y_obtener(nombre=kwargs['programa'])
-        if 'rol' in kwargs:
-            tipopersona = TipoPersona.crear_y_obtener(nombre=kwargs['rol'])
-        if 'id_persona' in kwargs:
-            persona = Persona.query.get(kwargs['id_persona'])
-
-        carrera = Carrera.crear_y_obtener(universidad=universidad, facultad=facultad, campus=campus, programa=programa)
-        persona_carrera = personasCarreras.crear_y_obtener(persona=persona, carrera=carrera, tipopersona=tipopersona)
-
-        resultado_guardar = persona_carrera.guardar()
-        self.Exito = resultado_guardar["Exito"]
-        self.MensajePorFallo = resultado_guardar["MensajePorFallo"]
         return self.obtenerResultado()

@@ -27,10 +27,16 @@ def sign_up():
     password = request.json.get('password', None)
     activo = 1
     try:
-        user = User(username=username, password=password, activo=activo)
-        user.guardar()
-        print('Usuario creado correctamente')
-        return {"msg": "Usuario creado correctamente"}, 200
+        if username and password:
+            print('Datos correctamente')
+            user = User(username=username, password=password, activo=activo)
+            user.guardar()
+            print('Usuario creado correctamente')
+            return {"msg": "Usuario creado correctamente"}, 200
+        else:
+            print('Faltan datos')
+            return {"msg": "Faltan datos para crear el usuario"}, 401
+
     except Exception as e:
         print(f'Hubo un error al crear un usuario: {e}')
         return {"msg": "Error al crear un usuario"}, 400

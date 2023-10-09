@@ -28,8 +28,8 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        usuario = User(username=os.getenv("DEFAULT_USER"), password=os.getenv("DEFAULT_PASSWORD"), activo=1)
-        usuario.guardar()
+        # usuario = User(username=os.getenv("DEFAULT_USER"), password=os.getenv("DEFAULT_PASSWORD"), activo=1)
+        # usuario.guardar()
 
     app.register_blueprint(auth_bp)
     api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')

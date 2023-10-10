@@ -212,12 +212,13 @@ class User(BaseEntity):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     persona_id = db.Column(db.Integer, db.ForeignKey("personas.id"))
-
+    activo = db.Column(db.Integer)
     persona = db.relationship("Persona", backref="user", uselist=False)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, activo):
         self.username = username
         self.set_password(password)
+        self.activo = activo
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

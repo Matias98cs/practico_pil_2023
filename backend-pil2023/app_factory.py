@@ -11,6 +11,7 @@ from modules.models.entities import User
 from modules.apis.lugares import LugaresResource
 from modules.apis.generos import GenerosResource
 from modules.apis.carreras import CarrerasResource
+from modules.apis.tipo_persona import TipoPersonaResource
 from modules.models.base import db
 # from modules.routes_personas import personas_bp
 
@@ -35,6 +36,7 @@ def create_app():
     api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
     api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')
     api.add_resource(CarrerasResource, '/api/carreras', '/api/carreras/<string:recurso>')
+    api.add_resource(TipoPersonaResource,  '/api/tipo-persona')
     api.add_resource(GenerosResource, '/api/generos')
 
     return app

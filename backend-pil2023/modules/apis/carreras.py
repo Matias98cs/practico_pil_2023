@@ -12,6 +12,19 @@ class CarrerasResource(Resource):
             print(recurso)
             return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400
 
+        elif recurso == "obtener_todo":
+            data = request.get_json()
+            pagina = data.get("pagina")
+            filtros = data.get("filtros", {})
+
+            print(filtros)
+            carreras, total_paginas = gestor_carreras().obtener_pagina(pagina, **filtros)
+            for carrera in carreras:
+                pd = carrera.serialize()
+                print(pd['facultad'])
+            return {"Exito": True, "MensajePorFallo": None, "Resultado": None}, 200
+
+
         elif recurso == "obtener_universidades":
             print(recurso)
             universidades = gestor_carreras().obtener_universidades()
@@ -123,9 +136,6 @@ class CarrerasResource(Resource):
             programas = gestor_carreras_personas().crear(universidad=universidad, facultad=facultad,
                                                                    campus=campus, programa=programa, tipo=tipo,
                                                                    id_persona=id_persona)
-            print(programas)
-            for pro in programas:
-                print(pro)
             return ({"Exito": True, "MensajePorFallo": programas['MensajePorFallo'], "Resultado": None},
                     200)
 

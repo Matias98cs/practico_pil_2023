@@ -4,6 +4,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from modules.auth import auth_bp, login_manager
+from modules.rutas_exel import reportes_exel
 from modules.auth import csrf
 from config import db_connector, db_user, db_password, db_ip_address, db_name
 from modules.apis.personas import PersonasResource
@@ -34,6 +35,7 @@ def create_app():
         # usuario.guardar()
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(reportes_exel)
     api.add_resource(UsuariosResource, '/api/usuario', '/api/usuario/<int:username>')
     api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
     api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')

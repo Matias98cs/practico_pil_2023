@@ -199,7 +199,7 @@ class gestor_personas(ResponseMessage):
         return Persona.query.all()
 
     def obtener_con_filtro(self, **kwargs):
-        query = Persona.query.filter(Persona.activo == True)
+        query = Persona.query.filter(Persona)
         if 'nombre' in kwargs:
             query = query.filter(Persona.nombre.ilike(f"%{kwargs['nombre']}%"))
         if 'apellido' in kwargs:

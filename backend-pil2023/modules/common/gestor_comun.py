@@ -1,5 +1,7 @@
 import re
-
+from openpyxl import Workbook
+from flask import send_file
+import io
 
 class ResponseMessage:
     def __init__(self, Resultado=None, Exito=True, MensajePorFallo=""):
@@ -25,3 +27,25 @@ class validaciones:
             return True
         else:
             return False
+        
+class exportar:
+
+    def exportar_excel(datos):
+        wb = Workbook()
+        ws = wb.active
+        headers = list(datos[0].keys())
+        ws.append(headers)
+
+        for item in datos:
+            ws.append(list(item.values()))
+
+        excel_data = io.BytesIO()
+        wb.save(excel_data)
+        excel_data.seek(0)
+
+        response_headers = {
+            'Content-Disposition' : 'attachment; filename=reporte.xlsx',
+            'Content-Type' : 'application/vdn.openmxlformats-officedocument.spreadheetml.sheet'
+        }
+
+        return send_file('reporte.xlsx')

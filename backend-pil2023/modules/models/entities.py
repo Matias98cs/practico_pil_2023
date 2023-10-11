@@ -10,7 +10,7 @@ class Persona(BaseEntity):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
     apellido = db.Column(db.String(100))
-    email = email = db.Column(db.String(255), unique=True)
+    email = db.Column(db.String(255), unique=True)
     birthdate = db.Column(db.Date)
     personal_id = db.Column(db.String(50), unique=True)
     genero_id = db.Column(db.Integer, db.ForeignKey("genero.id"), nullable=False)
@@ -18,6 +18,7 @@ class Persona(BaseEntity):
 
     genero = db.relationship("Genero", backref="related_genero")
     lugar = db.relationship("Lugar", backref="related_lugar")
+    # carrera = db.relationship("Carrera", backref="related_carrera")
 
     def __init__(self, nombre, apellido, email, birthdate, personal_id, genero, lugar):
         self.nombre = nombre
@@ -188,7 +189,7 @@ class Carrera(BaseEntity):
         self.campus = campus
 
 
-class personasCarreras(BaseEntity):
+class PersonasCarreras(BaseEntity):
     __tablename__ = "personasCarreras"
     __table_args__ = (db.UniqueConstraint('persona_id', 'carrera_id', 'tipo_id', name='uix_pers_carreras_tipo_unico'),)
     id = db.Column(db.Integer, primary_key=True)

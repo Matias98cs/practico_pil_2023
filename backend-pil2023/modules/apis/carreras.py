@@ -9,9 +9,11 @@ from modules.common.gestor_carreras import gestor_carreras
 class CarrerasResource(Resource):
     def get(self, recurso=None):
         if not recurso:
+            print(recurso)
             return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400
 
         elif recurso == "obtener_universidades":
+            print(recurso)
             universidades = gestor_carreras().obtener_universidades()
 
             universidades_data = []
@@ -47,7 +49,6 @@ class CarrerasResource(Resource):
                 return {"Exito": False, "MensajePorFallo": persona["MensajePorFallo"], "Resultado": None}, 400
 
             carreras = gestor_carreras_personas().obtener_carreras_por_persona(persona["Resultado"])
-
             carreras_data = []
             for cadaUna in carreras:
                 pd = cadaUna.serialize()
@@ -112,18 +113,21 @@ class CarrerasResource(Resource):
             facultad = data.get('facultad')
             campus = data.get('campus')
             programa = data.get('programa')
-            rol = data.get('rol')
+            tipo = data.get('tipo')
             id_persona = data.get('id_persona')
-            if not universidad or not facultad or not campus or not programa or not rol:
+            if not universidad or not facultad or not campus or not programa or not tipo:
                 return {"Exito": False,
                         "MensajePorFallo": "Debe indicar una Universidad / Facultad / Campus / Programa / Rol",
                         "Resultado": None}, 400
 
-            programas = gestor_carreras_personas().asignar_carrera(universidad=universidad, facultad=facultad,
-                                                                   campus=campus, programa=programa, rol=rol,
+            programas = gestor_carreras_personas().crear(universidad=universidad, facultad=facultad,
+                                                                   campus=campus, programa=programa, tipo=tipo,
                                                                    id_persona=id_persona)
-
-            return {"Exito": True, "MensajePorFallo": None, "Resultado": None}, 200
+            print(programas)
+            for pro in programas:
+                print(pro)
+            return ({"Exito": True, "MensajePorFallo": programas['MensajePorFallo'], "Resultado": None},
+                    200)
 
         else:
             return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400

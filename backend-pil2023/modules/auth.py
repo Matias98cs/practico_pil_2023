@@ -2,23 +2,33 @@ from flask import redirect, url_for, request, flash, render_template, abort, jso
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from modules.models.entities import User
 from flask import Blueprint
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_jwt_extended.exceptions import JWTDecodeError
 from flask_wtf.csrf import CSRFProtect
 from functools import wraps
-import json
+from modules.common.gestor_usuarios import gestor_usuarios
+from flask_restful import Resource
 
 auth_bp = Blueprint('auth', __name__)
 
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# class UsuariosResource(Resource):
+#     def post(self):
+#         data = request.get_json()
+#         username = data.get('username')
+#         print(f"Username: {username}")
+#         resultado = gestor_usuarios().obtener_usuario(username)
+#         if resultado['Exito']:
+#             return {"Exito": resultado["Exito"], "MensajePorFallo": resultado['MensajePorFallo'],
+#                     "Resultado": None}, 400
+#         else:
+#             args = request.get_json()
+#             crear_usuario = gestor_usuarios().crear_usuario(**args)
+#             return {"Exito": crear_usuario["Exito"], "MensajePorFallo": "Usuario creado correctamente",
+#                     "Resultado": None}, 200
+
 
 @auth_bp.route('/protected', methods=['GET'])
 @jwt_required()
@@ -57,27 +67,6 @@ def perfil():
         print(f"Hubo un error al encontrar el usuario: {e}")
         return {"msg": f"Error al encontrar el usuario : {e}"}
 
-
-@auth_bp.route('/sing-up', methods=['POST'])
-@csrf.exempt
-def sign_up():
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-    activo = 1
-    try:
-        if username and password:
-            print('Datos correctamente')
-            user = User(username=username, password=password, activo=activo)
-            user.guardar()
-            print('Usuario creado correctamente')
-            return {"msg": "Usuario creado correctamente"}, 200
-        else:
-            print('Faltan datos')
-            return {"msg": "Faltan datos para crear el usuario"}, 401
-
-    except Exception as e:
-        print(f'Hubo un error al crear un usuario: {e}')
-        return {"msg": "Error al crear un usuario"}, 400
 
 @auth_bp.route('/login-jwt', methods=['POST'])
 @csrf.exempt

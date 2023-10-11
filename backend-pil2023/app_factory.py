@@ -12,8 +12,9 @@ from modules.apis.lugares import LugaresResource
 from modules.apis.generos import GenerosResource
 from modules.apis.carreras import CarrerasResource
 from modules.apis.tipo_persona import TipoPersonaResource
+from modules.apis.usuarios import UsuariosResource
 from modules.models.base import db
-# from modules.routes_personas import personas_bp
+from modules.routes_personas import personas_bp
 
 
 def create_app():
@@ -33,6 +34,7 @@ def create_app():
         # usuario.guardar()
 
     app.register_blueprint(auth_bp)
+    api.add_resource(UsuariosResource, '/api/usuario', '/api/usuario/<int:username>')
     api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
     api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')
     api.add_resource(CarrerasResource, '/api/carreras', '/api/carreras/<string:recurso>')

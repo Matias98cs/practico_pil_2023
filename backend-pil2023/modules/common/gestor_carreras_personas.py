@@ -1,9 +1,10 @@
 from modules.common.gestor_comun import ResponseMessage, validaciones
-from modules.models.entities import Persona, personasCarreras, Carrera, Universidad, Facultad, Campus, Programa, \
+from modules.models.entities import Persona, PersonasCarreras, Carrera, Universidad, Facultad, Campus, Programa, \
     TipoPersona, db
 from config import registros_por_pagina
 from datetime import datetime
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 
 class gestor_carreras_personas(ResponseMessage):
@@ -20,7 +21,7 @@ class gestor_carreras_personas(ResponseMessage):
 
     def validar_campos_obligatorios(self, kwargs):
         for campo, mensaje in self.campos_obligatorios.items():
-            if campo not in kwargs or kwargs(campo):
+            if campo not in kwargs or kwargs[campo] == '':
                 self.Exito = False
                 self.MensajePorFallo = mensaje
                 return False
@@ -36,9 +37,9 @@ class gestor_carreras_personas(ResponseMessage):
         campus=Campus.crear_y_obtener(nombre=kwargs['campus'])
         programa=Programa.crear_y_obtener(nombre=kwargs['programa'])
         carrera = Carrera.crear_y_obtener(universidad=universidad, facultad=facultad, campus=campus, programa=programa)
-        persona=Persona.crear_y_obtener(id=kwargs['persona_id'])
+        persona=Persona.crear_y_obtener(id=kwargs['id_persona'])
 
-        nueva_carrera_persona = personasCarreras( persona=persona, carrera=carrera, tipopersona=tipopersona )
+        nueva_carrera_persona = PersonasCarreras(persona=persona, carrera=carrera, tipopersona=tipopersona)
 
         resultado_crear=nueva_carrera_persona.guardar()
         self.Resultado=resultado_crear['Resultado']
@@ -51,7 +52,7 @@ class gestor_carreras_personas(ResponseMessage):
         if not self.validar_campos_obligatorios(kwargs):
             return self.obtenerResultado()
         
-        personacarrera = personasCarreras.query.get(id)
+        personacarrera = PersonasCarreras.query.get(id)
         print('id de la carrera-persona')
         print(id)
 
@@ -91,30 +92,22 @@ class gestor_carreras_personas(ResponseMessage):
         resultado_guardar = personacarrera.guardar()
         self.Exito = resultado_guardar["Exito"]
         self.MensajePorFallo = resultado_guardar["MensajePorFallo"]
-        return self.obtenerResultado()  
+        return self.obtenerResultado()
 
     def obtener_carreras_por_persona(self, persona):
         carreras = (
-            db.session.query(personasCarreras)
-            .filter(personasCarreras.persona == persona)
-            .filter(personasCarreras.activo == True)
+            db.session.query(PersonasCarreras)
+            .filter(PersonasCarreras.persona == persona)
             .join(Carrera)
-            .join(Carrera.activo==True)
             .join(Universidad)
-            .join(Universidad.activo==True)
             .join(Facultad)
-            .join(Facultad.activo==True)
             .join(Campus)
-            .join(Campus.activo==True)
             .join(Programa)
-            .join(Programa.activo==True)
             .order_by(Universidad.nombre, Facultad.nombre, Campus.nombre, Programa.nombre).all()
-
         )
         return carreras
-
     def obtener_pagina(self, pagina, **kwargs):
-        query = personasCarreras.query.filter_by(persona_id=kwargs['persona_id']).filter(personasCarreras.activo==True)
+        query = PersonasCarreras.query.filter_by(persona_id=kwargs['persona_id']).filter(PersonasCarreras.activo==True)
         if 'programa' in kwargs:
             query = query.join(Carrera).filter(Carrera.activo==True).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
         if 'facultad' in kwargs:
@@ -124,11 +117,11 @@ class gestor_carreras_personas(ResponseMessage):
         if 'universidad' in kwargs:
             query = query.join(Universidad).filter(Universidad.activo==True).join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
 
-        carreras, total_paginas = personasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
+        carreras, total_paginas = PersonasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
         return carreras, total_paginas
 
     def eliminar(self, id):
-        carrera = personasCarreras.query.get(id)
+        carrera = PersonasCarreras.query.get(id)
         if carrera == None:
             self.Exito = False
             self.MensajePorFallo = "La carrera no existe"

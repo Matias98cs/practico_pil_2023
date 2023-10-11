@@ -27,12 +27,13 @@ class validaciones:
             return True
         else:
             return False
-        
-class exportar:
 
+
+class exportar:
     def exportar_excel(datos):
         wb = Workbook()
         ws = wb.active
+
         headers = list(datos[0].keys())
         ws.append(headers)
 
@@ -44,8 +45,8 @@ class exportar:
         excel_data.seek(0)
 
         response_headers = {
-            'Content-Disposition' : 'attachment; filename=reporte.xlsx',
-            'Content-Type' : 'application/vdn.openmxlformats-officedocument.spreadheetml.sheet'
+            'Content-Disposition': 'attachment; filename=reporte.xlsx',
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         }
 
-        return send_file('reporte.xlsx')
+        return excel_data.read(), 200, response_headers

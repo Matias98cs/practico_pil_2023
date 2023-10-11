@@ -106,16 +106,18 @@ class gestor_carreras_personas(ResponseMessage):
             .order_by(Universidad.nombre, Facultad.nombre, Campus.nombre, Programa.nombre).all()
         )
         return carreras
+
     def obtener_pagina(self, pagina, **kwargs):
-        query = PersonasCarreras.query.filter_by(persona_id=kwargs['persona_id']).filter(PersonasCarreras.activo==True)
+        query = db.session.query(PersonasCarreras).filter_by(persona_id=kwargs.get('persona_id'), activo=True)
+
         if 'programa' in kwargs:
-            query = query.join(Carrera).filter(Carrera.activo==True).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
+            query = query.join(Carrera).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
+
         if 'facultad' in kwargs:
-            query = query.join(Facultad).filter(Facultad.activo==True).join(Facultad).filter(Facultad.nombre.ilike(f"%{kwargs['facultad']}%"))
-        if 'campus' in kwargs:
-            query = query.join(Campus).filter(Campus.activo==True).join(Campus).filter(Campus.nombre.ilike(f"%{kwargs['campus']}%"))
+            query = query.join(Facultad).filter(Facultad.nombre.ilike(f"%{kwargs['facultad']}%"))
+
         if 'universidad' in kwargs:
-            query = query.join(Universidad).filter(Universidad.activo==True).join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
+            query = query.join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
 
         carreras, total_paginas = PersonasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
         return carreras, total_paginas

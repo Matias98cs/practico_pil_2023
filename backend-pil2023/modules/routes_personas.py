@@ -35,43 +35,40 @@ def obtener_lista_paginada():
 @personas_bp.route('/personas/<int:persona_id>/editar', methods=['GET', 'POST'])
 def editar_persona(persona_id):
     if request.method == 'POST':
-        formulario_data = request.form.to_dict()
-        resultado = gestor_personas().editar(persona_id, **formulario_data)
+        data = request.get_json()
+        resultado = gestor_personas().editar(persona_id, **data)
         if resultado["Exito"]:
-            flash('Persona actualizada correctamente', 'success')
-            return redirect(url_for('routes_personas.obtener_lista_paginada'))
+            return {"Persona": None, "resultado": "Persona actualizada correctamente"}, 200
         else:
-            flash(resultado["MensajePorFallo"], 'warning')
+            return {"Persona": None, "resultado": resultado['MensajePorFallo']}, 401
 
     resultado = gestor_personas().obtener(persona_id)
     if resultado["Exito"]:
         persona = resultado["Resultado"]
-        return render_template('personas/editar_persona.html', persona=persona)
+        pd = persona.serialize()
+        return {"persona": pd, "resultado": "Persona encontrada"}
     else:
-        flash(resultado["MensajePorFallo"], 'warning')
-        return redirect(url_for('routes_personas.obtener_lista_paginada'))
+        return {"resultado": resultado['MensajePorFallo'], "persona": None}
 
 
 @personas_bp.route('/personas/<int:persona_id>', methods=['POST'])
 def eliminar_persona(persona_id):
     resultado = gestor_personas().eliminar(persona_id)
     if resultado["Exito"]:
-        flash('Persona eliminada correctamente', 'success')
+        return {"resultado": "Persona eliminada correctamente"}, 200
     else:
         flash('Error al eliminar persona', 'success')
-    return redirect(url_for('routes_personas.obtener_lista_paginada'))
+        return {"resultado": "Error al eliminar persona"}, 401
 
 
 @personas_bp.route('/personas/crear', methods=['GET', 'POST'])
 def crear_persona():
     formulario_data = {}
     if request.method == 'POST':
-        formulario_data = request.form.to_dict()
+        formulario_data = request.get_json()
         resultado = gestor_personas().crear(**formulario_data)
         if resultado["Exito"]:
-            flash('Persona creada correctamente', 'success')
-            return redirect(url_for('routes_personas.obtener_lista_paginada'))
+            return {"resultado": "Persona creada correctamente"}, 200
         else:
-            flash(resultado["MensajePorFallo"], 'warning')
-    return render_template('personas/crear_persona.html', formulario_data=formulario_data)
+            return {"resultado": resultado['MensajePorFallo']}, 401
 

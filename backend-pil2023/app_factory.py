@@ -22,7 +22,7 @@ def create_app():
     app.secret_key = os.urandom(24)
     app.config['SQLALCHEMY_DATABASE_URI'] = f"{db_connector}://{db_user}:{db_password}@{db_ip_address}/{db_name}"
     db.init_app(app)
-    csrf.init_app(app)
+    # csrf.init_app(app)
     CORS(app, resources={r"//*": {"origins": "http://localhost:5173", "methods": "GET" "POST" "PUT" "DELETE"}})
     api = Api(app, decorators=[csrf.exempt])
     jwt = JWTManager(app)
@@ -34,11 +34,12 @@ def create_app():
         # usuario.guardar()
 
     app.register_blueprint(auth_bp)
-    api.add_resource(UsuariosResource, '/api/usuario', '/api/usuario/<int:username>')
-    api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
-    api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')
-    api.add_resource(CarrerasResource, '/api/carreras', '/api/carreras/<string:recurso>')
-    api.add_resource(TipoPersonaResource,  '/api/tipo-persona')
-    api.add_resource(GenerosResource, '/api/generos')
+    app.register_blueprint(personas_bp)
+    # # api.add_resource(UsuariosResource, '/api/usuario', '/api/usuario/<int:username>')
+    # api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
+    # api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')
+    # api.add_resource(CarrerasResource, '/api/carreras', '/api/carreras/<string:recurso>')
+    # api.add_resource(TipoPersonaResource,  '/api/tipo-persona')
+    # api.add_resource(GenerosResource, '/api/generos')
 
     return app

@@ -1,6 +1,7 @@
 from modules.common.gestor_comun import ResponseMessage, validaciones
-from modules.models.entities import Persona, Carrera, Universidad, Facultad, Campus, Programa, TipoPersona, db
-
+from modules.models.entities import (Persona, Carrera, Universidad, Facultad, Campus, Programa, TipoPersona,
+                                     PersonasCarreras, db)
+from config import registros_por_pagina
 
 class gestor_carreras(ResponseMessage):
     def __init__(self):
@@ -53,5 +54,19 @@ class gestor_carreras(ResponseMessage):
             db.session.query(TipoPersona).all()
         )
         return resultado
+
+
+    def obtener_pagina(self, pagina, **kwargs):
+        query = db.session.query(PersonasCarreras).filter_by(persona_id=kwargs.get('persona_id'), activo=True)
+        # query = db.session.query(Carrera)
+        if 'programa' in kwargs:
+            query = query.join(Carrera).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
+        if 'facultad' in kwargs:
+            query = query.join(Facultad).filter(Facultad.nombre.ilike(f"%{kwargs['facultad']}%"))
+        if 'universidad' in kwargs:
+            query = query.join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
+
+        carreras, total_paginas = PersonasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
+        return carreras, total_paginas
 
 

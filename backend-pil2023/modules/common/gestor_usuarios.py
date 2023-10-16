@@ -36,7 +36,7 @@ class gestor_usuarios(ResponseMessage):
 
         username = kwargs['username']
         password = kwargs['password']
-        activo = kwargs['activo']
+        activo = 1
         nuevo_usuario = User(username=username, password=password, activo=activo)
         resultado_crear = nuevo_usuario.guardar()
         self.Resultado = resultado_crear["Resultado"]

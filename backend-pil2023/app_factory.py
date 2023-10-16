@@ -18,6 +18,7 @@ from modules.models.base import db
 from modules.routes_personas import personas_bp
 from modules.routes_lugares import lugares_bp
 from modules.routes_generos import generos_bp
+from modules.routes_usuarios import usuarios_bp
 
 
 def create_app():
@@ -41,6 +42,7 @@ def create_app():
     app.register_blueprint(personas_bp)
     app.register_blueprint(lugares_bp)
     app.register_blueprint(generos_bp)
+    app.register_blueprint(usuarios_bp)
     # # api.add_resource(UsuariosResource, '/api/usuario', '/api/usuario/<int:username>')
     # api.add_resource(PersonasResource, '/api/personas', '/api/personas/<int:persona_id>')
     # api.add_resource(LugaresResource, '/api/lugares', '/api/lugares/<string:lugar_type>')

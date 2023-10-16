@@ -16,17 +16,13 @@ class CarrerasResource(Resource):
             data = request.get_json()
             pagina = data.get("pagina")
             filtros = data.get("filtros", {})
-
-            print(filtros)
             carreras, total_paginas = gestor_carreras().obtener_pagina(pagina, **filtros)
             for carrera in carreras:
                 pd = carrera.serialize()
-                print(pd['facultad'])
             return {"Exito": True, "MensajePorFallo": None, "Resultado": None}, 200
 
 
         elif recurso == "obtener_universidades":
-            print(recurso)
             universidades = gestor_carreras().obtener_universidades()
 
             universidades_data = []

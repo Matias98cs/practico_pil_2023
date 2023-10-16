@@ -57,8 +57,7 @@ class gestor_carreras(ResponseMessage):
 
 
     def obtener_pagina(self, pagina, **kwargs):
-        query = db.session.query(PersonasCarreras).filter_by(persona_id=kwargs.get('persona_id'), activo=True)
-        # query = db.session.query(Carrera)
+        query = PersonasCarreras.query.filter_by(persona_id=kwargs["persona_id"])
         if 'programa' in kwargs:
             query = query.join(Carrera).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
         if 'facultad' in kwargs:

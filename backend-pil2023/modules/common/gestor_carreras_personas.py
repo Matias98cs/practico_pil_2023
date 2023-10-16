@@ -94,31 +94,22 @@ class gestor_carreras_personas(ResponseMessage):
         self.MensajePorFallo = resultado_guardar["MensajePorFallo"]
         return self.obtenerResultado()
 
+    def __init__(self):
+        super().__init__()
+
     def obtener_carreras_por_persona(self, persona):
         carreras = (
             db.session.query(PersonasCarreras)
             .filter(PersonasCarreras.persona == persona)
-            .join(Carrera)
-            .join(Universidad)
-            .join(Facultad)
-            .join(Campus)
-            .join(Programa)
-            .order_by(Universidad.nombre, Facultad.nombre, Campus.nombre, Programa.nombre).all()
+            # .filter(PersonasCarreras.activo == True)
+            .all()
         )
         return carreras
 
     def obtener_pagina(self, pagina, **kwargs):
-        query = db.session.query(PersonasCarreras).filter_by(persona_id=kwargs.get('persona_id'), activo=True)
-
-        if 'programa' in kwargs:
-            query = query.join(Carrera).join(Programa).filter(Programa.nombre.ilike(f"%{kwargs['programa']}%"))
-
-        if 'facultad' in kwargs:
-            query = query.join(Facultad).filter(Facultad.nombre.ilike(f"%{kwargs['facultad']}%"))
-
-        if 'universidad' in kwargs:
-            query = query.join(Universidad).filter(Universidad.nombre.ilike(f"%{kwargs['universidad']}%"))
-
+        query = PersonasCarreras.query
+        if 'persona' in kwargs:
+            query = query.filter(PersonasCarreras.persona == kwargs['persona'])
         carreras, total_paginas = PersonasCarreras.obtener_paginado(query, pagina, registros_por_pagina)
         return carreras, total_paginas
 

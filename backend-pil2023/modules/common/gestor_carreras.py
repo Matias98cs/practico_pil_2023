@@ -69,3 +69,14 @@ class gestor_carreras(ResponseMessage):
         return carreras, total_paginas
 
 
+    def obtener_todo(self):
+        return Carrera.obtener_todo()
+
+    def obtener_todo_facultades(self):
+        return Facultad.obtener_todo()
+
+    def obtener_todo_campus(self):
+        return Campus.obtener_todo()
+
+    def obtener_todo_programa(self):
+        return Programa.obtener_todo()

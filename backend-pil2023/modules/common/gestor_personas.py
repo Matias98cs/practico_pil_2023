@@ -52,7 +52,7 @@ class gestor_personas(ResponseMessage):
             return False
 
     def obtener_pagina(self, pagina, **kwargs):
-        query = Persona.query
+        query = Persona.query.filter(Persona.activo == True)
         if 'nombre' in kwargs:
             query = query.filter(Persona.nombre.ilike(f"%{kwargs['nombre']}%"))
         if 'apellido' in kwargs:

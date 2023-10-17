@@ -12,8 +12,20 @@ def carreras_todo(recurso):
     if not recurso:
         return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400
 
+    elif recurso == "obtener_todo":
+        carreras = gestor_carreras().obtener_todo()
+        carreras_data = []
+        for item in carreras:
+            cr = item.serialize()
+            cr['id'] = item.id
+            cr['universidad'] = item.universidad.nombre
+            cr['campus'] = item.campus.nombre
+            cr['facultad'] = item.facultad.nombre
+            cr['programa'] = item.programa.nombre
+            carreras_data.append(cr)
+        return {"Exito": True, "Resultado": carreras_data}
+
     elif recurso == "obtener_universidades":
-        print(recurso)
         universidades = gestor_carreras().obtener_universidades()
 
         universidades_data = []
@@ -33,7 +45,6 @@ def carreras_todo(recurso):
 
     else:
         return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400
-
 
 @carreras_bp.route("/obtener_facultad_campus_programa/<recurso>", methods=["GET", "POST"])
 def obtener_todo(recurso):
@@ -170,3 +181,35 @@ def editar_carrera():
             return {"Exito": False, "MensajePorFallo": persona_carrera['MensajePorFallo'], "Resultado": None}, 400
     else:
         return {"Exito": False, "MensajePorFallo": "Al menos un campo no tiene datos", "Resultado": None}, 400
+
+
+@carreras_bp.route('/obtener_facultades', methods=['GET'])
+def obtener_facultades():
+    facultades = gestor_carreras().obtener_todo_facultades()
+    facultad_data = []
+    for item in facultades:
+        fc = item.serialize()
+        facultad_data.append(fc)
+    return {"Exito": True, "MensajePorFallo": None,
+            "Resultado": facultad_data}, 201
+
+
+@carreras_bp.route('/obtener_campus', methods=['GET'])
+def obtener_campus():
+    campus = gestor_carreras().obtener_todo_campus()
+    campus_data = []
+    for item in campus:
+        fc = item.serialize()
+        campus_data.append(fc)
+    return {"Exito": True, "MensajePorFallo": None,
+            "Resultado": campus_data}, 201
+
+@carreras_bp.route('/obtener_programas', methods=['GET'])
+def obtener_programas():
+    programas = gestor_carreras().obtener_todo_programa()
+    programas_data = []
+    for item in programas:
+        fc = item.serialize()
+        programas_data.append(fc)
+    return {"Exito": True, "MensajePorFallo": None,
+            "Resultado": programas_data}, 201

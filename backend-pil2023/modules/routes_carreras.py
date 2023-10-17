@@ -148,3 +148,25 @@ def eliminar_carrera(recurso):
 
     else:
         return {"Exito": False, "MensajePorFallo": "Recurso no definido", "Resultado": None}, 400
+
+
+@carreras_bp.route("/editar-carrera", methods=["POST"])
+def editar_carrera():
+    data = request.get_json()
+    carrera_id = data.get("carrera_id")
+    campos = {
+        "universidad": data.get('universidad'),
+        "facultad": data.get('facultad'),
+        "campus": data.get('campus'),
+        "programa": data.get('programa'),
+        "tipo": data.get('tipo')
+    }
+    if all(value is not None for value in campos.values()):
+        persona_carrera = gestor_carreras_personas().editar(carrera_id, **campos)
+        if persona_carrera['Exito']:
+            return {"Exito": persona_carrera["Exito"], "MensajePorFallo": persona_carrera["MensajePorFallo"],
+                    "Resultado": None}, 201
+        else:
+            return {"Exito": False, "MensajePorFallo": persona_carrera['MensajePorFallo'], "Resultado": None}, 400
+    else:
+        return {"Exito": False, "MensajePorFallo": "Al menos un campo no tiene datos", "Resultado": None}, 400

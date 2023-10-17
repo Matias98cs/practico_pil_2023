@@ -53,8 +53,6 @@ class gestor_carreras_personas(ResponseMessage):
             return self.obtenerResultado()
         
         personacarrera = PersonasCarreras.query.get(id)
-        print('id de la carrera-persona')
-        print(id)
 
         if personacarrera==None:
             self.Exito=False
@@ -62,8 +60,6 @@ class gestor_carreras_personas(ResponseMessage):
             return self.obtenerResultado()
         
         persona=personacarrera.persona
-        print('Modificar Persona')
-        print(persona)
 
         universidad=personacarrera.carrera.universidad
         facultad=personacarrera.carrera.facultad

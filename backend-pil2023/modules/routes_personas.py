@@ -72,3 +72,20 @@ def crear_persona():
         else:
             return {"resultado": resultado['MensajePorFallo']}, 401
 
+
+@personas_bp.route('/persona/<int:persona_id>', methods=['GET'])
+def obtener_persona(persona_id):
+    if persona_id:
+        resultado = gestor_personas().obtener(persona_id)
+        if resultado['Exito']:
+            persona = resultado['Resultado']
+            persona_data = persona.serialize()
+            persona_data["birthdate"] = persona.birthdate.isoformat()
+            persona_data["pais"] = persona.lugar.pais.nombre
+            persona_data["provincia"] = persona.lugar.provincia.nombre
+            persona_data["ciudad"] = persona.lugar.ciudad.nombre
+            persona_data["barrio"] = persona.lugar.barrio.nombre
+            persona_data["genero"] = persona.genero.nombre
+            return {"exito": True,"persona": persona_data}, 200
+        else:
+            return {"exito": False,"persona": None, "msg": "No existe esa persona"}
